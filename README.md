@@ -11,12 +11,9 @@ A machine learning web application that predicts **Emergency Room (ER) wait time
 - [Features](#-features)
 - [Dataset](#-dataset)
 - [Project Structure](#-project-structure)
-- [Prerequisites](#-prerequisites)
 - [Installation & Setup](#-installation--setup)
 - [Running the App](#-running-the-app)
 - [Usage Guide](#-usage-guide)
-- [Model Information](#-model-information)
-- [Notes](#-notes)
 - [Contributing](#-contributing)
 
 ---
