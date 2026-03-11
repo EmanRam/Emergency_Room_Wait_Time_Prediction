@@ -1,4 +1,4 @@
-import os
+from pathlib import Path
 import joblib
 import pandas as pd
 import streamlit as st
@@ -11,7 +11,7 @@ st.set_page_config(
     initial_sidebar_state="expanded",
 )
 
-# ── CSS ──────────────────────────────────────────────────
+# ── CSS (custom layout/cards/buttons only) ───────────────
 st.markdown("""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Nunito:wght@400;500;600;700&display=swap');
@@ -27,17 +27,13 @@ html, body, [data-testid="stAppViewContainer"],
     background: #1b2a4a !important;
     border-right: none !important;
     padding-top: 0 !important;
-    color: #c8d4e8 !important;
-    font-family: 'Nunito', sans-serif !important;
 }
 
-/* Keep sidebar typography without forcing every nested element color */
 [data-testid="stSidebar"] p,
 [data-testid="stSidebar"] span,
 [data-testid="stSidebar"] label,
 [data-testid="stSidebar"] small {
     font-family: 'Nunito', sans-serif !important;
-    color: #c8d4e8 !important;
 }
 
 /* Sidebar nav buttons */
@@ -65,7 +61,7 @@ html, body, [data-testid="stAppViewContainer"],
     box-shadow: none !important;
 }
 
-/* Hide sidebar resize handle completely */
+/* Hide sidebar resize handle */
 [data-testid="stSidebarResizeHandle"] {
     display: none !important;
     visibility: hidden !important;
@@ -151,140 +147,6 @@ h2, h3 {
     font-size: 16px;
 }
 
-/* ── User input widgets only: white boxes + black text ── */
-
-/* Base input containers */
-div[data-testid="stSelectbox"] > div > div,
-div[data-testid="stMultiSelect"] > div > div,
-div[data-testid="stNumberInput"] > div,
-div[data-testid="stDateInput"] > div > div,
-div[data-testid="stTextInput"] > div > div,
-div[data-testid="stTextArea"] > div > div {
-    background: #ffffff !important;
-    border: 1.5px solid #dbe3f0 !important;
-    border-radius: 10px !important;
-    color: #000000 !important;
-    transition: border-color 0.2s !important;
-}
-
-/* Focus / hover state */
-div[data-testid="stSelectbox"] > div > div:hover,
-div[data-testid="stSelectbox"] > div > div:focus-within,
-div[data-testid="stMultiSelect"] > div > div:hover,
-div[data-testid="stMultiSelect"] > div > div:focus-within,
-div[data-testid="stNumberInput"] > div:hover,
-div[data-testid="stNumberInput"] > div:focus-within,
-div[data-testid="stDateInput"] > div > div:hover,
-div[data-testid="stDateInput"] > div > div:focus-within,
-div[data-testid="stTextInput"] > div > div:hover,
-div[data-testid="stTextInput"] > div > div:focus-within,
-div[data-testid="stTextArea"] > div > div:hover,
-div[data-testid="stTextArea"] > div > div:focus-within {
-    border-color: #4a90d9 !important;
-    box-shadow: 0 0 0 3px rgba(74,144,217,0.12) !important;
-}
-
-/* Input labels */
-div[data-testid="stSelectbox"] label,
-div[data-testid="stMultiSelect"] label,
-div[data-testid="stNumberInput"] label,
-div[data-testid="stSlider"] label,
-div[data-testid="stDateInput"] label,
-div[data-testid="stTextInput"] label,
-div[data-testid="stTextArea"] label {
-    font-size: 13px !important;
-    font-weight: 600 !important;
-    color: #000000 !important;
-}
-
-/* Typed text / displayed values */
-div[data-testid="stNumberInput"] input,
-div[data-testid="stTextInput"] input,
-div[data-testid="stTextArea"] textarea,
-div[data-testid="stDateInput"] input {
-    color: #000000 !important;
-    -webkit-text-fill-color: #000000 !important;
-    background: #ffffff !important;
-    border: none !important;
-    font-weight: 700 !important;
-}
-
-/* Disabled inputs like Region / derived fields */
-div[data-testid="stTextInput"] input:disabled,
-div[data-testid="stNumberInput"] input:disabled,
-div[data-testid="stDateInput"] input:disabled,
-div[data-testid="stTextArea"] textarea:disabled {
-    color: #000000 !important;
-    -webkit-text-fill-color: #000000 !important;
-    opacity: 1 !important;
-    background: #ffffff !important;
-}
-
-/* Selectbox selected value */
-div[data-testid="stSelectbox"] [data-baseweb="select"] > div,
-div[data-testid="stMultiSelect"] [data-baseweb="select"] > div {
-    background: #ffffff !important;
-    border: 1.5px solid #dbe3f0 !important;
-    border-radius: 10px !important;
-    color: #000000 !important;
-}
-
-/* Text inside select / multiselect */
-div[data-testid="stSelectbox"] [data-baseweb="select"] span,
-div[data-testid="stSelectbox"] [data-baseweb="select"] div,
-div[data-testid="stSelectbox"] [data-baseweb="select"] input,
-div[data-testid="stMultiSelect"] [data-baseweb="select"] span,
-div[data-testid="stMultiSelect"] [data-baseweb="select"] div,
-div[data-testid="stMultiSelect"] [data-baseweb="select"] input {
-    color: #000000 !important;
-    -webkit-text-fill-color: #000000 !important;
-}
-
-/* Select dropdown arrow */
-div[data-testid="stSelectbox"] svg,
-div[data-testid="stMultiSelect"] svg {
-    fill: #000000 !important;
-}
-
-/* Dropdown popup */
-div[role="listbox"] {
-    background: #ffffff !important;
-    border: 1px solid #dbe3f0 !important;
-    border-radius: 10px !important;
-    box-shadow: 0 8px 24px rgba(27,42,74,0.12) !important;
-    color: #000000 !important;
-}
-
-/* Dropdown options */
-div[role="option"] {
-    background: #ffffff !important;
-    color: #000000 !important;
-}
-div[role="option"] * {
-    color: #000000 !important;
-}
-
-/* Hovered option */
-div[role="option"]:hover {
-    background: #eef4ff !important;
-    color: #000000 !important;
-}
-
-/* Selected option */
-div[role="option"][aria-selected="true"] {
-    background: #dbeafe !important;
-    color: #000000 !important;
-}
-
-/* ── Slider ── */
-div[data-testid="stSlider"] [data-baseweb="slider"] [role="slider"] {
-    background: #4a90d9 !important;
-    box-shadow: 0 2px 8px rgba(74,144,217,0.4) !important;
-}
-div[data-testid="stSlider"] [data-baseweb="slider"] div[data-testid="stTickBar"] + div div {
-    background: #4a90d9 !important;
-}
-
 /* ── Predict button ── */
 .stButton > button {
     background: linear-gradient(135deg, #2563eb, #1d4ed8) !important;
@@ -303,6 +165,15 @@ div[data-testid="stSlider"] [data-baseweb="slider"] div[data-testid="stTickBar"]
 .stButton > button:hover {
     transform: translateY(-2px) !important;
     box-shadow: 0 10px 28px rgba(37,99,235,0.45) !important;
+}
+
+/* ── Slider accent ── */
+div[data-testid="stSlider"] [data-baseweb="slider"] [role="slider"] {
+    background: #4a90d9 !important;
+    box-shadow: 0 2px 8px rgba(74,144,217,0.4) !important;
+}
+div[data-testid="stSlider"] [data-baseweb="slider"] div[data-testid="stTickBar"] + div div {
+    background: #4a90d9 !important;
 }
 
 /* ── Result ── */
@@ -417,7 +288,7 @@ div[data-testid="stSlider"] [data-baseweb="slider"] div[data-testid="stTickBar"]
     to   { opacity: 1; transform: scale(1); }
 }
 
-/* ── Table in expander ── */
+/* ── Expander ── */
 div[data-testid="stExpander"] {
     border-radius: 12px !important;
     border: 1px solid #e8ecf4 !important;
@@ -426,9 +297,10 @@ div[data-testid="stExpander"] {
 </style>
 """, unsafe_allow_html=True)
 
-# ── Constants ─────────────────────────────────────────────
-CSV_PATH = "ER Wait Time Dataset.csv"
-MODEL_PATH = "er_wait_model.pkl"
+# ── Paths / constants ────────────────────────────────────
+BASE_DIR = Path(__file__).resolve().parent
+CSV_PATH = BASE_DIR / "data" / "ER Wait Time Dataset.csv"
+MODEL_PATH = BASE_DIR / "models" / "er_wait_model.pkl"
 TARGET = "Total Wait Time (min)"
 
 FEATURE_COLS = [
@@ -506,8 +378,8 @@ def safe_int_series_bounds(series: pd.Series, default_min: int, default_max: int
 # ── Data loader ───────────────────────────────────────────
 @st.cache_data(show_spinner=False)
 def load_data():
-    if not os.path.exists(CSV_PATH):
-        st.error(f"❌ '{CSV_PATH}' not found. Place it in the same folder as app.py.")
+    if not CSV_PATH.exists():
+        st.error(f"❌ '{CSV_PATH}' not found.")
         st.stop()
 
     df = pd.read_csv(CSV_PATH)
@@ -533,13 +405,12 @@ def load_data():
     df["Visit Date"] = pd.to_datetime(df["Visit Date"], errors="coerce")
     df = df.dropna(subset=["Visit Date"]).copy()
     df = df.sort_values("Visit Date").reset_index(drop=True)
-
     return df
 
 # ── Model loader ──────────────────────────────────────────
 @st.cache_resource(show_spinner="⚙️ Loading trained model...")
 def load_model():
-    if not os.path.exists(MODEL_PATH):
+    if not MODEL_PATH.exists():
         st.error(
             f"❌ '{MODEL_PATH}' not found.\n\n"
             "Export the final no-leak Gradient Boosting pipeline from your notebook using joblib.dump()."
@@ -557,7 +428,7 @@ def load_model():
 
     return model, artifact_feature_cols
 
-# ── Session state for page ────────────────────────────────
+# ── Session state ─────────────────────────────────────────
 if "page" not in st.session_state:
     st.session_state.page = "home"
 
@@ -777,7 +648,7 @@ if page == "home":
         "and Time to Medical Professional are intentionally excluded."
     )
 
-    if os.path.exists(MODEL_PATH):
+    if MODEL_PATH.exists():
         st.success(f"✅ Saved model found: `{MODEL_PATH}`")
     else:
         st.error(f"❌ Saved model not found: `{MODEL_PATH}`")
@@ -809,7 +680,7 @@ elif page == "predict":
 
     st.markdown("<div class='section-divider'></div>", unsafe_allow_html=True)
 
-    # ── Section 1: Hospital & Location ───────────────────
+    # Section 1
     st.markdown("""<div class="feat-card"><div class="feat-card-title"><span>🏥</span> Hospital & Location</div>""", unsafe_allow_html=True)
 
     hospital_name = st.selectbox("Hospital Name", sorted(df_ref["Hospital Name"].dropna().astype(str).unique()))
@@ -840,7 +711,7 @@ elif page == "predict":
 
     st.markdown("</div>", unsafe_allow_html=True)
 
-    # ── Section 2: Visit Timing ───────────────────────────
+    # Section 2
     st.markdown("""<div class="feat-card"><div class="feat-card-title"><span>🕐</span> Visit Timing</div>""", unsafe_allow_html=True)
 
     col3, col4 = st.columns(2)
@@ -880,7 +751,7 @@ elif page == "predict":
 
     st.markdown("</div>", unsafe_allow_html=True)
 
-    # ── Section 3: Patient Information ───────────────────
+    # Section 3
     st.markdown("""<div class="feat-card"><div class="feat-card-title"><span>🧑‍⚕️</span> Patient Information</div>""", unsafe_allow_html=True)
 
     urgency_level = st.selectbox(
@@ -891,7 +762,7 @@ elif page == "predict":
 
     st.markdown("</div>", unsafe_allow_html=True)
 
-    # ── Section 4: Staffing ───────────────────────────────
+    # Section 4
     st.markdown("""<div class="feat-card"><div class="feat-card-title"><span>👩‍⚕️</span> Staffing & Resources</div>""", unsafe_allow_html=True)
 
     col8, col9 = st.columns(2)
@@ -921,13 +792,11 @@ elif page == "predict":
         "from the visit date and visit hour to keep predictions consistent with Dataset 3."
     )
 
-    # ── Predict Button ────────────────────────────────────
     st.markdown("<br>", unsafe_allow_html=True)
     _, btn_col, _ = st.columns([1, 2, 1])
     with btn_col:
         predict = st.button("⚡  Predict Wait Time")
 
-    # ── Result ────────────────────────────────────────────
     if predict:
         input_df = pd.DataFrame([{
             "Hospital Name": hospital_name,

@@ -1,12 +1,13 @@
 # 🏥 ER Wait Time Predictor
 
-A machine learning web application that predicts **Emergency Room wait times** based on patient, hospital, and contextual factors. Built with **Streamlit** and trained on 5,000 real ER visit records, the app helps hospital staff and administrators anticipate congestion and improve patient flow management.
+A machine learning web application that predicts **Emergency Room (ER) wait times** using a **final no-leak Gradient Boosting model** trained on **Dataset 3**. Built with **Streamlit** and trained on **5,000 ER visit records**, the app helps estimate total patient wait time based on hospital, staffing, urgency, and visit timing factors.
 
 ---
 
 ## 📋 Table of Contents
 
 - [Project Description](#-project-description)
+- [Key Findings](#-key-findings)
 - [Features](#-features)
 - [Dataset](#-dataset)
 - [Project Structure](#-project-structure)
@@ -14,28 +15,60 @@ A machine learning web application that predicts **Emergency Room wait times** b
 - [Installation & Setup](#-installation--setup)
 - [Running the App](#-running-the-app)
 - [Usage Guide](#-usage-guide)
+- [Model Information](#-model-information)
+- [Notes](#-notes)
 - [Contributing](#-contributing)
 
 ---
 
 ## 📌 Project Description
 
-Emergency rooms face unpredictable patient surges, making it difficult to allocate resources efficiently. Long wait times directly impact patient outcomes and satisfaction.
+Emergency rooms face unpredictable patient surges, making it difficult to allocate resources efficiently. Long wait times affect patient satisfaction, delay treatment, and create operational pressure on hospitals.
 
-This project addresses that challenge by training regression models on historical ER visit data to **forecast total patient wait time in minutes**. The result is an interactive dashboard where users can input patient and hospital parameters and receive an instant, color-coded wait time prediction.
+This project addresses that challenge by training regression models on historical ER visit data to **predict total wait time in minutes**. The final deployed system is based on the strongest **trustworthy** model from the project: a **Gradient Boosting Regressor** trained on the **Dataset 3 no-leak feature set**.
 
-The app uses the best model which is **Gradient Boosting** to make prediction.
+The web app provides an interactive interface where users can enter operational ER conditions and receive an instant, color-coded estimate of expected wait time.
+
+---
+
+## 🔍 Key Findings
+
+This project followed a two-phase workflow:
+
+### Phase 1 — Baseline Patient-Level Dataset
+A patient-level dataset containing demographic and administrative variables was used as the baseline.
+
+**Result:**
+- Very weak predictive performance
+- Best validation score was approximately **R² = 0.008**
+- Test performance remained negative
+
+**Insight:**  
+Patient demographics and basic administrative features alone were not sufficient to explain ER wait time.
+
+### Phase 2 — Operational Dataset
+A richer dataset containing operational features such as urgency, staffing, hospital size, and visit timing was then used.
+
+Initial results were nearly perfect, but this was caused by **target leakage**.
+
+#### Leaked features removed:
+- `Time to Registration`
+- `Time to Triage`
+- `Time to Medical Professional`
+
+After removing leaked variables, the final model became realistic and trustworthy.
 
 ---
 
 ## ✨ Features
 
-- 🤖 **ML Models** — Gradient Boosting regression
-- ⚡ **Instant Predictions** — Fill in patient/hospital details and get a wait time estimate in under a second
-- 📊 **Exploratory Dashboard** — Summary statistics and visual breakdowns of the ER dataset
-- 🎨 **Color-coded Results** — Green / yellow / red indicators based on estimated wait severity
-- 💾 **Pre-trained Model Support** — Loads a saved `.pkl` artifact automatically; retrains on the fly if not found
-- 📓 **Jupyter Notebooks** — Full EDA and model development workflow included
+- 🤖 **Final Deployed Model** — Gradient Boosting Regressor (No-Leak)
+- ⚡ **Instant Predictions** — Get an ER wait time estimate in seconds
+- 🧠 **Operational Inputs** — Uses hospital, staffing, urgency, and visit timing variables
+- 🎨 **Color-coded Results** — Green / amber / red severity levels
+- 💾 **Pre-trained Model Support** — Loads a saved `.pkl` artifact from the `models/` folder
+- 📓 **Notebook Workflow** — Includes model development and exploratory analysis notebooks
+- 🗂 **Clean Repo Structure** — Organized into `data/`, `models/`, and `notebooks/`
 
 ---
 
@@ -43,31 +76,51 @@ The app uses the best model which is **Gradient Boosting** to make prediction.
 
 | Property | Details |
 |---|---|
-| **File** | `ER Wait Time Dataset.csv` |
+| **Dataset** | ER Wait Time Dataset |
 | **Records** | 5,000 ER visits |
 | **Target Variable** | `Total Wait Time (min)` |
 
-**Features include:**
+### Main input features used by the app
+- `Hospital Name`
+- `Region`
+- `Day of Week`
+- `Season`
+- `Time of Day`
+- `Urgency Level`
+- `Nurse-to-Patient Ratio`
+- `Specialist Availability`
+- `Facility Size (Beds)`
+- `hour`
+- `day`
+- `month`
+- `day_of_week`
 
-- `Visit Date`, `Day of Week`, `Season`, `Time of Day`
-- `Urgency Level`, `Nurse-to-Patient Ratio`, `Specialist Availability`
-- `Facility Size (Beds)`, `Region`, `Hospital Name`
+### Derived in the app
+The app derives time-based fields automatically from the selected visit date and visit hour.
 
 ---
 
 ## 🗂 Project Structure
 
-```
-ER_Wait_Time/
+```bash
+Emergency_Room_Wait_Time_Prediction/
 │
-├── app.py                        # Main Streamlit application
-├── requirements.txt              # Python dependencies
-├── ER Wait Time Dataset.csv      # Source dataset (5,000 records)
-├── er_wait_model.pkl             # Saved best model artifact (generated after running notebook)
+├── app.py
+├── README.md
+├── requirements.txt
 │
-└── notebooks/
-    ├── Hospital_ER_Wait_Time.ipynb   # Exploratory Data Analysis
-    └── ER_Wait_Time_3.ipynb          # Model training, evaluation & saving
+├── data/
+│   └── ER Wait Time Dataset.csv
+│
+├── models/
+│   └── er_wait_model.pkl
+│
+├── notebooks/
+│   ├── Hospital_ER_Wait_Time.ipynb
+│   └── ER_Wait_Time_3.ipynb
+│
+└── .streamlit/
+    └── config.toml
 ```
 
 ---
